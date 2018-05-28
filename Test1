@@ -1,0 +1,418 @@
+'''
+案例一主要是基于“中国人民共和国地市级党委书记数据库(2000-2010) ”数据进行数据挖掘，该数据库由
+复旦大学经济学院陈硕副教授及其团队(Fudan WTF Social Science Lab)成员整理，主要研究问题如下：
+1、性别构成
+2、年龄情况、专业情况
+3、任期情况
+
+课程技术点：
+数据读取及查看 / 数据清洗 / 数据分析 / 图表制作
+
+参考文章：
+《如何成为一位市委书记？》，链接：http://mp.weixin.qq.com/s/K09ybCQGoGzf_ckDGYMfmA
+
+加油！
+'''
+'''
+Part1  数据读取及查看
+'''
+# 先将.xls文件导出成.csv文件
+# 注意：以下一切代码均为英文输入法，包括标点符号等！！
+
+import numpy as np  
+import pandas as pd 
+import matplotlib.pyplot as plt
+# numpy：科学计算工具包
+# pandas：数据分析工具包
+# malplotlib：图表绘制工具包
+# improt语句：加载工具包
+
+data = pd.read_csv("F:\Anaconda3\地市级党委书记数据库（2000-10）.csv",encoding = "gbk",engine = 'python')
+print(data)
+# 加载csv数据，并且将数据赋予data变量
+# 这里用到了pandas的工具包，读取数据之后的格式为Dataframe，是一种矩阵格式（execl的数据表格其实也是一种矩阵格式）
+# pyhton中，创造一个变量的方法就是给其赋值，而“=”代表 变量赋值
+# print()是python最基本的语句之一，代表“打印内容”
+
+# 注意，对于读取文件报错情况，可尝试以下方法：
+# ① excel转csv时，可设置编码为utf-8，并更改参数 → encoding = 'utf-8'
+# ② mac导出csv时，可以更改参数 → encoding = "gb18030"
+# ③ 可将文件名改为英文文件名，例如“data.csv”
+
+print(data.head(10))
+print('----------')
+# 查看前十个数据
+# 这里注意了：python的序号从0开始，所以前十个数据的序号为 0-9
+# "print('----------')" 画一个分隔线
+
+print(data[10:20])
+print('----------')
+# 查看数据序号10-20个数据（也就是第11至第21个数据）
+
+print(data['党委书记姓名'])
+print('----------')
+# 查看“党委书记姓名”字段的所有数据
+
+field = data.columns.tolist()
+print(type(field))
+print('----------')
+print(field)
+# 创造一个变量field，赋值为数据data的字段
+# type()是输出数据类型，这里的类型为“列表list”，python核心数据类型之一
+
+#print(data.describe())
+#print('----------')
+# .describe()返回基本数据信息
+# .describe(include=[np.number])只统计数值类型
+# ()中没有任何参数时，会默认只统计数值类型的字段内容，包括：计数，平均数，方差，最小值，最大值，四分位数，若其中有字符串数据会报错
+
+print(data.describe(include=[np.object]))
+# 这里代表只统计字符串类型的字段内容：计数，唯一值数量，出现频率最高的内容，最高出现频率
+
+'''
+Part2  问题一_性别构成
+'''
+# 市委书记性别比例
+
+data_gender = data['性别']
+print(data_gender.head())
+print('----------')
+# 新建变量data_gender，赋值所有性别数据
+
+data_gender_re = data_gender[data_gender.notnull()]
+print(data_gender_re.head())
+print(data_gender_re.unique())
+print('----------')
+# 删除所有缺失值（NaN），生成新的数据data_gender_re
+# .unique()表示显示数据的唯一值内容
+
+count = len(data_gender_re)
+count_m = len(data_gender_re[data_gender_re == '男'])
+count_w = len(data_gender_re[data_gender_re == '女'])
+rate_m = count_m/count
+rate_w = count_w/count
+print('样本量：' + str(count) + "\n",
+      '男性样本量：' + str(count_m) + "\n",
+      '女性样本量：' + str(count_w) + "\n",
+      '男性比例：' + str(rate_m*100)[:4] + '%' + "\n",
+      '女性比例：' + str(rate_w*100)[:4] + '%'
+        )
+print('----------')
+# "=="代表判断：左边是否等于右边
+# str()：将数值型转换为字符型
+# "\n" 代表提行
+# 百分号的书写，可以用简单的方法 —— 格式化字符:
+# print( '女性比例：%.2f%%' % (rate_w*100))
+import pandas as pd  # 导入pandas包
+data = pd.read_csv("F:\Anaconda3\地市级党委书记数据库（2000-10）.csv",encoding = "gbk",engine = 'python')  # 读取数据
+count = len(data)  # 计算市委书记总人数
+count_w = len(data[data['性别'] == '女'])  # 计算女性市委书记总人数
+rate_w = count_w/count  # 计算女性市委书记比例
+print("女性市委数据比例为：%.2f%%" % (rate_w*100))  # 结果输出
+
+data_age = data[['党委书记姓名','省级政区名称','出生年份']]
+data_age_re = data_age[data_age['出生年份'].notnull()]
+print(data_age_re.head())
+
+data2 = data[['党委书记姓名','省级政区名称','出生年份']]  # 提取数据
+print(data2.head())  # 输出前10个数据
+
+# 按省份分析市委书记女性比例
+
+data_gender2 = data[['省级政区名称','性别']]
+data_gender2_re = data_gender2[data_gender2['性别'].notnull()]
+print(data_gender2_re.head())
+print('----------')
+# 新建变量data_gender2，字段包括省份、性别
+# 去除缺失值
+
+pt = pd.crosstab(data_gender2_re['省级政区名称'], data_gender2_re['性别'])
+print(pt.head())
+print('----------')
+# 按照省份统计出男女人数
+# crosstab(行，列)用于针对字符串数据的透视（类似excel的数据透视）
+
+pt['女性占比'] =  pt['男'] / (pt['女'] + pt['男'])
+pt2 = pt.sort_values(by = ['女性占比'], ascending = False)
+print(pt2.head(10))
+print('----------')
+# 计算出女性占比
+# 这里直接在pt数据中添加了一个新的字段“女性占比”
+# sort_values()排序，ascending = False表示降序
+
+# 绘制图表1：不同省份女性市委书记占比
+# Seaborn可视化 - 柱状图
+
+import seaborn as sns
+sns.set(style="white", context="notebook")
+# 设置风格，seaborn有5种基本风格，context表示环境
+
+fig = plt.figure(figsize=(10,4))
+
+x = ['Liaoning','Shanxi','Jilin','Shanxi_m','Sichuan','Anhui','Jiangxi','Shandong','Fujian','Yunnan']
+pt2['女性占比百分数'] = pt2['女性占比'] *100
+y = pt2[:10]['女性占比百分数'].tolist()
+# 设定x，y值
+
+sns.barplot(x, y, palette="BuPu_r")
+plt.title('Percentage of Women leaders')
+plt.ylabel('Per %')
+# 数据可视化：柱状图
+
+sns.despine(bottom=True)
+plt.show() 
+# 绘制图表2：女性市委书记占比结构
+# Seaborn可视化 - 箱线图、小提琴图
+
+import seaborn as sns
+sns.set(style="ticks", context="notebook")
+# 设置风格，seaborn有5种基本风格，context表示环境
+
+x = ['Percentage of Women leaders_structure']
+y = pt2[:]['女性占比'].tolist()
+# 设定x，y值
+
+fig = plt.figure(figsize=(8,4))
+sns.boxplot(data = y,palette="Greens")
+plt.title('Percentage of Women leaders')
+plt.ylabel('Per %')
+# 数据可视化：箱型图
+
+sns.despine(bottom=True)
+plt.show() 
+
+# 绘制图表2：女性市委书记占比结构
+# Seaborn可视化 - 小提琴图
+
+import seaborn as sns
+sns.set(style="ticks", context="notebook")
+# 设置风格，seaborn有5种基本风格，context表示环境
+
+x = ['Percentage of Women leaders_structure']
+y = pt2['女性占比'].tolist()
+# 设定x，y值
+
+fig = plt.figure(figsize=(6,4))
+sns.violinplot(data = y,palette="Oranges")
+plt.title('Percentage of Men leaders')
+plt.ylabel('Per %')
+# 数据可视化：小提琴图
+
+sns.despine(bottom=True)
+plt.show() 
+
+'''
+Part3  问题二_年龄情况、专业情况
+'''
+
+# 年龄情况：整体年龄分布 / 入职年龄分布 / 卸任年龄分布
+
+data_age = data[['出生年份','党委书记姓名','年份']]
+data_age_re = data_age[data_age['出生年份'].notnull()]
+print(data_age_re.head())
+print(data_age_re['出生年份'].unique())
+print(data_age_re.describe())
+print('----------')
+# 新建变量data_age，赋值包括年份、出生年份字段内容
+# 清除缺失值
+
+df1 = 2017 - data_age_re['出生年份']
+print(df1.head())
+print('----------')
+# 计算出整体年龄数据
+
+df_yearmin = data_age_re[['党委书记姓名','年份']].groupby(data_age_re['党委书记姓名']).min()
+df2 = df_yearmin['年份'].groupby(df_yearmin['年份']).count()
+print(df2)
+print('----------')
+# 计算出入职年龄数据
+
+df_yearmax = data_age_re[['党委书记姓名','年份']].groupby(data_age_re['党委书记姓名']).max()
+df3 = df_yearmax['年份'].groupby(df_yearmax['年份']).count()
+print(df3)
+print('----------')
+# 计算出卸任年龄数据
+
+# 专业情况：专业结构 / 专业整体情况 / 专业大类分布 
+
+data_major = data[['党委书记姓名','年份','专业：人文','专业：社科','专业：理工','专业：农科','专业：医科']]
+data_major_re = data_major[data_major['专业：人文'].notnull()]
+print(data_major_re.head())
+print(data_major_re.describe())
+print('----------')
+# 新建变量data_major，赋值包括年份、专业等字段内容，其中1代表是，0代表否
+# 清除缺失值
+
+data_major_re['专业'] = data_major_re[['专业：人文', '专业：社科', '专业：理工', '专业：农科', '专业：医科']].idxmax(axis=1)
+print(data_major_re.head())
+print('----------')
+# 统计每个人的专业
+
+data_major_st = data_major_re[['专业','党委书记姓名']].drop_duplicates()
+print(data_major_st.head())
+print('----------')
+# 去重
+
+df4 = data_major_st['专业'].groupby(data_major_st['专业']).count()
+print(df4)
+print('----------')
+# 计算出学历结构数据
+
+df5 = pd.crosstab(data_major_re['年份'], data_major_re['专业'])
+print(df5)
+print('----------')
+# 计算每年专业整体情况数据
+
+df5['社科比例'] = df5['专业：社科'] / (df5['专业：理工'] + df5['专业：医科'] + df5['专业：社科'] + df5['专业：农科'] + df5['专业：人文'])
+df5['人文比例'] = df5['专业：人文'] / (df5['专业：理工'] + df5['专业：医科'] + df5['专业：社科'] + df5['专业：农科'] + df5['专业：人文'])
+df5['理工农医比例'] = (df5['专业：理工'] + df5['专业：医科'] + df5['专业：农科'])/ (df5['专业：理工'] + df5['专业：医科'] + df5['专业：社科'] + df5['专业：农科'] + df5['专业：人文'])
+print(df5[['社科比例','人文比例','理工农医比例']])
+print('----------')
+# 计算每年专业大类分布数据
+
+# 年龄情况：图表绘制
+
+fig_q2 = plt.figure(figsize = (12,8))
+# 创建一个图表，大小为10*8
+
+ax1 = fig_q2.add_subplot(2,3,1)
+ax2 = fig_q2.add_subplot(2,3,2)
+ax3 = fig_q2.add_subplot(2,3,3)
+ax4 = fig_q2.add_subplot(2,3,4)
+ax5 = fig_q2.add_subplot(2,3,5)
+ax6 = fig_q2.add_subplot(2,3,6)
+# 创建一个3*2的表格矩阵
+
+ax1.hist(df1,bins = 11,color = 'gray', alpha=0.9)
+ax1.set_title('整体年龄分布')
+ax1.grid(True)
+# 绘制第一个表格
+
+ax2.plot(df2,color = 'r',marker = 'o',alpha=0.9)
+ax2.set_title('入职年龄分布')
+ax2.set_xticks(range(2000,2011,2))
+ax2.grid(True)
+# 绘制第二个表格
+
+ax3.plot(df3,color = 'g',marker = 'o',alpha=0.9)
+ax3.set_title('卸任年龄分布')
+ax3.set_xticks(range(2000,2011,2))
+ax3.grid(True)
+# 绘制第三个表格
+
+ax4.bar(range(len(df4)),df4,color = 'y')
+ax4.set_xticklabels(['人文','农科','医科','理工','社科'])
+ax4.grid(True)
+ax4.set_title('专业结构')
+# 绘制第四个表格
+
+ax5.plot(df5.index,df5[['专业：人文','专业：农科','专业：医科','专业：理工','专业：社科']])
+ax5.grid(True)
+ax5.set_title('专业整体情况')
+# 绘制第五个表格
+
+ax6.bar(df5.index,df5['社科比例'],color = 'darkred',alpha=0.7)
+ax6.bar(df5.index,df5['人文比例'],color = 'darkred',bottom = df5['社科比例'],alpha=0.5)
+ax6.bar(df5.index,df5['理工农医比例'],color = 'darkred',bottom = df5['人文比例'] + df5['社科比例'],alpha=0.3)
+ax6.grid(True)
+ax6.set_title('专业大类分布：社科、人文、理工农医')
+# 绘制第六个表格
+
+plt.show()
+
+# 绘制图表1：整体年龄分布
+# Seaborn可视化
+
+sns.set(context="notebook")
+# 设置风格，seaborn有5种基本风格，context表示环境
+
+x = df1.astype(int).tolist()
+sns.distplot(x, bins = 15, kde=True)
+plt.show() 
+
+# 绘制图表2：整体年龄分布
+# Seaborn可视化
+
+sns.set(context="notebook")
+# 设置风格，seaborn有5种基本风格，context表示环境
+
+x = df1.astype(int).tolist()
+sns.distplot(x, bins = 15, kde=True)
+plt.show() 
+
+'''
+Part4  问题三_任期情况
+'''
+
+# 绘制图表1：任期与出生年份关系
+    
+fig_q3_1 = plt.figure(figsize = (8,4))
+# 创建一个图表，大小为8*4
+
+plt.scatter(data_term_fin['出生年份'],data_term_fin['任期'],color='k', alpha=0.2, s = 20)
+plt.title('Relationship Between Birthyear & Tenure')
+plt.xlabel('BirthyearBirthyear')
+plt.ylabel('Tenure')
+plt.grid(True)
+plt.show()
+# 创建散点图，aplha代表透明度 → 点颜色叠加，s代表点大小，
+# 参数添加，grid添加网格
+# plt.show()：显示图表
+import matplotlib.pyplot as plt  # 导入matplotlib包
+fig = plt.figure(figsize = (8,4))  # 设置图表大小 8*4
+plt.scatter(data_term_fin['出生年份'],data_term_fin['任期'],color='k', alpha=0.2, s = 20) # 制图，设置参数
+plt.title('Relationship Between Birthyear & Tenure')  # 设置表名
+plt.xlabel('Birthyear')  # 设置X标签
+plt.ylabel('Tenure')  # 设置Y标签
+plt.show()  # 显示图表
+
+# 绘制图表1：任期与出生年份关系
+# Seaborn可视化 - 混合散点图
+
+sns.set(style="ticks", context="notebook")
+# 设置风格，seaborn有5种基本风格，context表示环境
+
+fig = plt.figure(figsize=(6,5))
+
+x = data_term_fin['任期']
+y = data_term_fin['出生年份']
+# 设定x，y值
+
+sns.jointplot(x, y,alpha=0.2)
+sns.jointplot(x, y, kind="hex")
+# sns.jointplot(x, y, kind="kde")
+# 数据可视化：混合散点图
+
+plt.show() 
+
+import seaborn as sns  # 导入seaborn包
+sns.set(style="ticks", context="notebook") # 设置整体可视化风格
+sns.jointplot(x, y, kind="hex")  # 数据可视化：散点直方图
+plt.show()  # 显示图表
+
+# 绘制图表2：任期与出生年份关系 - 热图
+# Seaborn可视化 - 热图
+
+sns.set(style="ticks", context="notebook")
+# 设置风格，seaborn有5种基本风格，context表示环境
+
+fig_q3_2 = plt.figure(figsize = (10,6))
+# 创建一个图表，大小为8*4
+
+df = pd.crosstab(data_term_fin['任期'], data_term_fin['出生年份'])
+#print(df.head())
+#print('----------')
+# 整合数据
+
+sns.heatmap(df,annot=True, fmt="d", linewidths=0.2,linecolor='k')
+plt.show()
+# 创建热图，横坐标为出生年份，纵坐标为任期
+
+df = pd.crosstab(data_term_fin['任期'], data_term_fin['出生年份'])  # 整合数据
+sns.heatmap(df,annot=True)  # 生成热图
+plt.xlabel('Birthyear') # X轴标签：出生年份
+plt.ylabel('Frequency') # Y轴标签：出现频率
+plt.show() # 显示图表
+
+data2 = data[['党委书记姓名','省级政区名称','出生年份']]  # 提取数据
+print(data2.head())  # 输出前10个数据
